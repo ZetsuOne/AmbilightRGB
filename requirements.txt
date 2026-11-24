@@ -1,0 +1,4 @@
+openrgb-python
+mss
+Pillow
+numpy

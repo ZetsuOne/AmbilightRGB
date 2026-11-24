@@ -1,0 +1,18 @@
+# Portable OpenRGB binaries (download separately / ship via Releases)
+bin/OpenRGB/*
+!bin/OpenRGB/.gitkeep
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Local / editor
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
