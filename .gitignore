@@ -2,6 +2,12 @@
 bin/OpenRGB/*
 !bin/OpenRGB/.gitkeep
 
+# Release / PyInstaller output (keep build scripts tracked)
+dist/
+build/**
+!build/build_release.bat
+!build/installer.iss
+
 # Python
 .venv/
 __pycache__/
