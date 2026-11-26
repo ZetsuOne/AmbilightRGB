@@ -10,7 +10,9 @@ if not exist ".venv\Scripts\python.exe" (
     exit /b 1
 )
 
-echo [1/2] Installing PyInstaller and building dist\ambilight.exe ...
+echo [1/2] Installing dependencies and building dist\ambilight.exe ...
+".venv\Scripts\python.exe" -m pip install -r requirements.txt
+if errorlevel 1 exit /b 1
 ".venv\Scripts\python.exe" -m pip install -U pyinstaller
 if errorlevel 1 exit /b 1
 
@@ -20,6 +22,8 @@ if errorlevel 1 exit /b 1
     --distpath dist ^
     --workpath build\pyinstaller ^
     --specpath build ^
+    --hidden-import pystray._win32 ^
+    --collect-submodules pystray ^
     ambilight.py
 if errorlevel 1 exit /b 1
 

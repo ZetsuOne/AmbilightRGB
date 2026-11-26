@@ -2,7 +2,7 @@
 ; Builds dist\AmbilightRGB-Setup.exe (run via build\build_release.bat)
 
 #define MyAppName "AmbilightRGB"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "AmbilightRGB"
 #define MyAppExeName "ambilight.exe"
 
@@ -40,14 +40,15 @@ Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
 
 [Run]
-; Autostart at logon with highest privileges (PowerShell Scheduled Task — reliable quoting)
+; Register the SMBus driver while setup itself is still elevated
+Filename: "{app}\bin\OpenRGB\openrgb.exe"; Parameters: "--server --startminimized"; WorkingDir: "{app}\bin\OpenRGB"; Flags: runhidden nowait skipifdoesntexist
+; Autostart at logon as the current user, without a permanent admin token
 Filename: "powershell.exe"; \
-    Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""$a = New-ScheduledTaskAction -Execute '{app}\{#MyAppExeName}'; $t = New-ScheduledTaskTrigger -AtLogOn; $p = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Highest; Register-ScheduledTask -TaskName 'AmbilightRGB' -Action $a -Trigger $t -Principal $p -Force"""; \
+    Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""$a = New-ScheduledTaskAction -Execute '{app}\{#MyAppExeName}'; $t = New-ScheduledTaskTrigger -AtLogOn; $p = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited; Register-ScheduledTask -TaskName 'AmbilightRGB' -Action $a -Trigger $t -Principal $p -Force"""; \
     Flags: runhidden waituntilterminated
 ; Start immediately after install
 Filename: "{app}\{#MyAppExeName}"; Flags: nowait runhidden
 
 [UninstallRun]
 Filename: "powershell.exe"; Parameters: "-NoProfile -Command ""Unregister-ScheduledTask -TaskName 'AmbilightRGB' -Confirm:$false -ErrorAction SilentlyContinue"""; Flags: runhidden waituntilterminated
-Filename: "{sys}\taskkill.exe"; Parameters: "/IM ambilight.exe /F /T"; Flags: runhidden waituntilterminated
-Filename: "{sys}\taskkill.exe"; Parameters: "/IM openrgb.exe /F /T"; Flags: runhidden waituntilterminated
+Filename: "powershell.exe"; Parameters: "-NoProfile -Command ""Get-Process ambilight,openrgb -ErrorAction SilentlyContinue | Where-Object {{ try {{ $_.Path.StartsWith('{app}') }} catch {{ $false }} }} | Stop-Process -Force"""; Flags: runhidden waituntilterminated
